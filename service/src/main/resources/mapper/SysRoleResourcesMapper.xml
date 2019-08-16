@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhangwx.dao.SysRoleResourcesMapper" >
+  <resultMap id="BaseResultMap" type="com.zhangwx.model.SysRoleResources" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="role_id" property="roleId" jdbcType="BIGINT" />
+    <result column="resource_id" property="resourceId" jdbcType="BIGINT" />
+    <result column="deleted" property="deleted" jdbcType="TINYINT" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="create_by" property="createBy" jdbcType="BIGINT" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="BIGINT" />
+    <result column="authority" property="authority" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+  </resultMap>
+
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, role_id, resource_id, deleted, create_at, create_by, update_at, update_by, authority, 
+    parent_id
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.zhangwx.model.SysRoleResourcesExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from sys_role_resources
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from sys_role_resources
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from sys_role_resources
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.zhangwx.model.SysRoleResourcesExample" >
+    delete from sys_role_resources
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.zhangwx.model.SysRoleResources" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sys_role_resources (role_id, resource_id, deleted, 
+      create_at, create_by, update_at, 
+      update_by, authority, parent_id
+      )
+    values (#{roleId,jdbcType=BIGINT}, #{resourceId,jdbcType=BIGINT}, #{deleted,jdbcType=TINYINT}, 
+      #{createAt,jdbcType=TIMESTAMP}, #{createBy,jdbcType=BIGINT}, #{updateAt,jdbcType=TIMESTAMP}, 
+      #{updateBy,jdbcType=BIGINT}, #{authority,jdbcType=VARCHAR}, #{parentId,jdbcType=BIGINT}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.zhangwx.model.SysRoleResources" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into sys_role_resources
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="resourceId != null" >
+        resource_id,
+      </if>
+      <if test="deleted != null" >
+        deleted,
+      </if>
+      <if test="createAt != null" >
+        create_at,
+      </if>
+      <if test="createBy != null" >
+        create_by,
+      </if>
+      <if test="updateAt != null" >
+        update_at,
+      </if>
+      <if test="updateBy != null" >
+        update_by,
+      </if>
+      <if test="authority != null" >
+        authority,
+      </if>
+      <if test="parentId != null" >
+        parent_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="roleId != null" >
+        #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="resourceId != null" >
+        #{resourceId,jdbcType=BIGINT},
+      </if>
+      <if test="deleted != null" >
+        #{deleted,jdbcType=TINYINT},
+      </if>
+      <if test="createAt != null" >
+        #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        #{createBy,jdbcType=BIGINT},
+      </if>
+      <if test="updateAt != null" >
+        #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        #{updateBy,jdbcType=BIGINT},
+      </if>
+      <if test="authority != null" >
+        #{authority,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.zhangwx.model.SysRoleResourcesExample" resultType="java.lang.Integer" >
+    select count(*) from sys_role_resources
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update sys_role_resources
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.roleId != null" >
+        role_id = #{record.roleId,jdbcType=BIGINT},
+      </if>
+      <if test="record.resourceId != null" >
+        resource_id = #{record.resourceId,jdbcType=BIGINT},
+      </if>
+      <if test="record.deleted != null" >
+        deleted = #{record.deleted,jdbcType=TINYINT},
+      </if>
+      <if test="record.createAt != null" >
+        create_at = #{record.createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.createBy != null" >
+        create_by = #{record.createBy,jdbcType=BIGINT},
+      </if>
+      <if test="record.updateAt != null" >
+        update_at = #{record.updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateBy != null" >
+        update_by = #{record.updateBy,jdbcType=BIGINT},
+      </if>
+      <if test="record.authority != null" >
+        authority = #{record.authority,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parentId != null" >
+        parent_id = #{record.parentId,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update sys_role_resources
+    set id = #{record.id,jdbcType=BIGINT},
+      role_id = #{record.roleId,jdbcType=BIGINT},
+      resource_id = #{record.resourceId,jdbcType=BIGINT},
+      deleted = #{record.deleted,jdbcType=TINYINT},
+      create_at = #{record.createAt,jdbcType=TIMESTAMP},
+      create_by = #{record.createBy,jdbcType=BIGINT},
+      update_at = #{record.updateAt,jdbcType=TIMESTAMP},
+      update_by = #{record.updateBy,jdbcType=BIGINT},
+      authority = #{record.authority,jdbcType=VARCHAR},
+      parent_id = #{record.parentId,jdbcType=BIGINT}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zhangwx.model.SysRoleResources" >
+    update sys_role_resources
+    <set >
+      <if test="roleId != null" >
+        role_id = #{roleId,jdbcType=BIGINT},
+      </if>
+      <if test="resourceId != null" >
+        resource_id = #{resourceId,jdbcType=BIGINT},
+      </if>
+      <if test="deleted != null" >
+        deleted = #{deleted,jdbcType=TINYINT},
+      </if>
+      <if test="createAt != null" >
+        create_at = #{createAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createBy != null" >
+        create_by = #{createBy,jdbcType=BIGINT},
+      </if>
+      <if test="updateAt != null" >
+        update_at = #{updateAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateBy != null" >
+        update_by = #{updateBy,jdbcType=BIGINT},
+      </if>
+      <if test="authority != null" >
+        authority = #{authority,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        parent_id = #{parentId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zhangwx.model.SysRoleResources" >
+    update sys_role_resources
+    set role_id = #{roleId,jdbcType=BIGINT},
+      resource_id = #{resourceId,jdbcType=BIGINT},
+      deleted = #{deleted,jdbcType=TINYINT},
+      create_at = #{createAt,jdbcType=TIMESTAMP},
+      create_by = #{createBy,jdbcType=BIGINT},
+      update_at = #{updateAt,jdbcType=TIMESTAMP},
+      update_by = #{updateBy,jdbcType=BIGINT},
+      authority = #{authority,jdbcType=VARCHAR},
+      parent_id = #{parentId,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <resultMap id="SimpleResultMap" type="com.zhangwx.model.SysRoleResources">
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="role_id" property="roleId" jdbcType="BIGINT" />
+    <result column="resource_id" property="resourceId" jdbcType="BIGINT" />
+    <result column="deleted" property="deleted" jdbcType="TINYINT" />
+    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="create_by" property="createBy" jdbcType="BIGINT" />
+    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="update_by" property="updateBy" jdbcType="BIGINT" />
+    <result column="authority" property="authority" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="BIGINT" />
+    <association property="role" column="role_id"  select="selectRoleById"/>
+    <association property="resources" column="resource_id" select="selectResById"/>
+  </resultMap>
+
+  <select id="selectRoleById" resultType="com.zhangwx.model.SysRole">
+    select * from sys_role where id=#{role_id}
+  </select>
+
+  <select id="selectResById" resultType="com.zhangwx.model.SysResources">
+    select * from sys_resources where id=#{resource_id}
+  </select>
+
+  <!--关联角色和资源-->
+  <select id="selectBySimpleExample" resultMap="SimpleResultMap" parameterType="com.zhangwx.model.SysRoleResourcesExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    'true' as QUERYID,
+    <include refid="Base_Column_List" />
+    from sys_role_resources
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+</mapper>

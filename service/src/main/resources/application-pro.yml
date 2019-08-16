@@ -1,0 +1,7 @@
+
+spring:
+  datasource:
+    username: mystore
+    password: 111111
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://120.77.210.27:3306/mystore?allowMultiQueries=true&useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&rewriteBatchedStatements=TRUE
