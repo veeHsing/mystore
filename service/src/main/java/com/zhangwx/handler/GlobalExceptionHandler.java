@@ -4,6 +4,7 @@ import com.zhangwx.base.Result;
 import com.zhangwx.constants.MyExceptionCode;
 import com.zhangwx.exception.ServiceException;
 import com.zhangwx.util.ResultsUtil;
+import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.slf4j.Logger;
@@ -41,12 +42,12 @@ public class GlobalExceptionHandler {
                     .map(ObjectError::getDefaultMessage)
                     .collect(Collectors.toList());
             return ResultsUtil.failure(-1,errorInformation.toString());
-        }else if(e instanceof AuthorizationException){
-            return ResultsUtil.failure(MyExceptionCode.SYS_DENY);
-        }else if (e instanceof UnauthorizedException){
+        }else if(e instanceof AuthorizationException || e instanceof UnauthorizedException){
             return ResultsUtil.failure(MyExceptionCode.SYS_DENY);
         }else if (e instanceof HttpMessageNotReadableException){
             return ResultsUtil.failure(MyExceptionCode.SYS_HTTP_MESSAGE);
+        }else if(e instanceof UnavailableSecurityManagerException){
+            return ResultsUtil.failure(MyExceptionCode.SYS_SHIRO_INVALID_URL);
         }
         else {
             logger.error("系统异常=》",e.getMessage());

@@ -7,6 +7,7 @@ import com.zhangwx.core.ResponseResult;
 import com.zhangwx.core.JWTToken;
 import com.zhangwx.service.SysUserService;
 import com.zhangwx.util.JJWTUtil;
+import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+//拦截url，处理jwt
 public class JJWTFilter extends BasicHttpAuthenticationFilter {
 
     // 登录标识
@@ -29,6 +31,7 @@ public class JJWTFilter extends BasicHttpAuthenticationFilter {
     /**
      * 检测用户是否登录
      * 检测header里面是否包含Authorization字段即可
+     *
      * @param request
      * @param response
      * @return
@@ -41,18 +44,27 @@ public class JJWTFilter extends BasicHttpAuthenticationFilter {
     }
 
     @Override
-    protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue)   {
+    protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
         if (isLoginAttempt(request, response)) {
             try {
-                executeLogin(request, response);
+                //如果存在token，执行登录
+                boolean is_login = executeLogin(request, response);
+                if (!is_login) {
+                    throw new Exception("jwtToken解析失败！");
+                } else {
+                    return true;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-                Result result=new Result(MyExceptionCode.SYS_JWT_PARSE_FAIL);
-                ResponseResult.responseResult(response,result);
+                Result result = new Result(MyExceptionCode.SYS_JWT_PARSE_FAIL);
+                ResponseResult.responseResult(response, result);
                 return false;
             }
+        } else {
+            Result result = new Result(MyExceptionCode.SYS_JWT_CANT_NULL);
+            ResponseResult.responseResult(response, result);
+            return false;
         }
-        return true;
     }
 
     @Override
@@ -60,20 +72,31 @@ public class JJWTFilter extends BasicHttpAuthenticationFilter {
         return super.onAccessDenied(request, response);
     }
 
-
-
+    //登录，验证token
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
-        HttpServletRequest req = (HttpServletRequest) request;
-        String token = req.getHeader(LOGIN_SIGN);
-        token=token.substring(7);
-        JJWTUtil.JWTBody jwtBody= JJWTUtil.getBody(token) ;
-        JWTToken jwtToken = new JWTToken(jwtBody.getUserName(),token);
-        Subject subject=getSubject(request, response);
-        subject.login(jwtToken);
-        HttpServletRequest request1=(HttpServletRequest) request;
-        request1.setAttribute(Constants.JWT_BODY,jwtBody);
-        return true;
+        try {
+            HttpServletRequest req = (HttpServletRequest) request;
+            String token = req.getHeader(LOGIN_SIGN);
+            if (token.substring(0, 6).equalsIgnoreCase("bearer")) {
+                token = token.substring(6);
+            }
+            token = token.trim();
+            JJWTUtil.JWTBody jwtBody = JJWTUtil.getBody(token);
+            if (jwtBody == null) {
+                return false;
+            }
+            JWTToken jwtToken = new JWTToken(jwtBody.getUserName(), token);
+            Subject subject = getSubject(request, response);
+            subject.login(jwtToken);
+            HttpServletRequest request1 = (HttpServletRequest) request;
+            request1.setAttribute(Constants.JWT_BODY, jwtBody);
+            return true;
+        } catch (AuthenticationException e) {
+            //抛出异常，解析失败
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**

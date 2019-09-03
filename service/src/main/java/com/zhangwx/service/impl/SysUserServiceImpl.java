@@ -25,6 +25,7 @@ import com.zhangwx.util.UserRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -238,21 +239,29 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteResource(SysResources sysResources) {
         Optional.ofNullable(sysResources).orElseThrow(()->new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
-        SysResources sysResources1=sysResourcesMapper.selectByPrimaryKey(sysResources.getId());
-        Optional.ofNullable(sysResources1).orElseThrow(()->new ServiceException(MyExceptionCode.SYS_RESOURCE_NOT_EXITS));
-        if (sysResources1.getParentId() > 0){
-            throw new ServiceException(MyExceptionCode.SYS_CANT_DELETE);
+        SysResources sysResourcesOrg=sysResourcesMapper.selectByPrimaryKey(sysResources.getId());
+        Optional.ofNullable(sysResourcesOrg).orElseThrow(()->new ServiceException(MyExceptionCode.SYS_RESOURCE_NOT_EXITS));
+        //判断当前菜单是否有孩子
+        SysResourcesExample exampleChild=new SysResourcesExample();
+        SysResourcesExample.Criteria criteriaChild=exampleChild.createCriteria();
+        criteriaChild.andParentIdEqualTo(sysResourcesOrg.getId());
+        criteriaChild.andDeletedEqualTo(EnumSysResources.DELETE_NO.getCode());
+        List<SysResources> sysResourcesChildList=sysResourcesMapper.selectByExample(exampleChild);
+        if (sysResourcesChildList.size() > 0){
+            throw new ServiceException(MyExceptionCode.SYS_RESOURCE_HAS_CHILD);
         }
         SysResourcesExample example=new SysResourcesExample();
         SysResourcesExample.Criteria criteria=example.createCriteria();
         criteria.andIdEqualTo(sysResources.getId());
-        int del=sysResourcesMapper.deleteByExample(example);
-        if (del > 0){
-            return  true;
-        }else {
-            return  false;
-        }
+        sysResourcesMapper.deleteByExample(example);
+
+        SysRoleResourcesExample sysRoleResourcesExample=new SysRoleResourcesExample();
+        SysRoleResourcesExample.Criteria criteria1=sysRoleResourcesExample.createCriteria();
+        criteria1.andResourceIdEqualTo(sysResources.getId().longValue());
+        sysRoleResourcesMapper.deleteByExample(sysRoleResourcesExample);
+        return  true;
     }
 }

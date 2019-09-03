@@ -23,18 +23,21 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class ShiroRealm extends AuthorizingRealm {
+/**
+ * Shiro核心配置
+ */
+public class MyShiroRealm extends AuthorizingRealm {
 
-    private static final Logger logger= LoggerFactory.getLogger(ShiroRealm.class);
+    private static final Logger logger= LoggerFactory.getLogger(MyShiroRealm.class);
 
     @Autowired
     private SysUserService sysUserService;
 
     private boolean cachingEnabled=false;
 
-
     /**
      * 授权认证
+     * 权限信息，包括角色以及权限
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
@@ -48,14 +51,12 @@ public class ShiroRealm extends AuthorizingRealm {
         set.add(sysRole.getCode());
         info.setRoles(set);
         return info;
-
     }
 
     @Override
     public boolean supports(AuthenticationToken token) {
         return token instanceof JWTToken;
     }
-
 
     /**
      * 登陆认证
@@ -82,10 +83,5 @@ public class ShiroRealm extends AuthorizingRealm {
             throw new ServiceException(MyExceptionCode.SYS_USER_NOT_EXIST);
         }
     }
-
-
-
-
-
 
 }

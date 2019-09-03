@@ -16,17 +16,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class ShiroConfiguration {
+public class ShiroConfig {
 
     private static final String JWT_FILTER_NAME = "jwt";
+    private static final String ROLE_FILTER_NAME = "role";
 
-    /**
-     * 自定义realm，实现登录授权流程
-     * @return
-     */
+    //自定义realm，实现登录授权流程
     @Bean
-    public ShiroRealm shiroDatabaseRealm(){
-        return  new ShiroRealm();
+    public MyShiroRealm shiroDatabaseRealm(){
+        return  new MyShiroRealm();
     }
 
     @Bean
@@ -35,6 +33,25 @@ public class ShiroConfiguration {
     }
 
 
+    //配置shiro过滤器
+    @Bean("shiroFilter")
+    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager) {
+        //1.定义shiroFactoryBean
+        ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
+        //2.设置securityManager
+        factoryBean.setSecurityManager(securityManager);
+        //3定义拦截器,主要获取，验证jwt，并把jwt中的用户信息存入request中，方便调用
+        Map<String, Filter> filterMap = new HashMap<>();
+        //首先做认证拦截，判断jwt token是否合法
+        filterMap.put(JWT_FILTER_NAME, new JJWTFilter());
+        //让后做授权拦截，判断当前请求是否合法权限
+        filterMap.put(ROLE_FILTER_NAME, new RoleFilter());
+        factoryBean.setFilters(filterMap);
+        //anon:所有url都可以匿名访问
+        //jwt，role[admin]:首先调用jwt拦截器，通过后调用role拦截器
+        factoryBean.setFilterChainDefinitionMap(definitionM().build());
+        return factoryBean;
+    }
 
     /**
      * 配置securityManager 管理subject（默认）,并把自定义realm交由manager
@@ -42,48 +59,16 @@ public class ShiroConfiguration {
      * @return
      */
     @Bean("securityManager")
-    public DefaultWebSecurityManager securityManager(ShiroRealm shiroDatabaseRealm) {
+    public DefaultWebSecurityManager securityManager(MyShiroRealm shiroDatabaseRealm) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(shiroDatabaseRealm);
-
         //非web关闭sessionManager(官网有介绍)
         DefaultSubjectDAO defaultSubjectDAO = new DefaultSubjectDAO();
         DefaultSessionStorageEvaluator storageEvaluator = new DefaultSessionStorageEvaluator();
         storageEvaluator.setSessionStorageEnabled(false);
         defaultSubjectDAO.setSessionStorageEvaluator(storageEvaluator);
         securityManager.setSubjectDAO(defaultSubjectDAO);
-
         return securityManager;
-    }
-
-    @Bean("shiroFilter")
-    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager) {
-
-        ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
-        factoryBean.setFilters(filterMap());
-        factoryBean.setSecurityManager(securityManager);
-        factoryBean.setFilterChainDefinitionMap(definitionM().build());
-//        factoryBean.setFilterChainDefinitionMap(definitionMap());
-        return factoryBean;
-    }
-
-    /**
-     * 自定义拦截器，处理所有请求
-     */
-    private Map<String, Filter> filterMap() {
-        Map<String, Filter> filterMap = new HashMap<>();
-        filterMap.put(JWT_FILTER_NAME, new JJWTFilter());
-        return filterMap;
-    }
-
-    /**
-     * url拦截规则
-     */
-    private Map<String, String> definitionMap() {
-        Map<String, String> definitionMap = new HashMap<>();
-        definitionMap.put("/login", "anon");
-        definitionMap.put("/**", JWT_FILTER_NAME);
-        return definitionMap;
     }
 
     @Bean
@@ -105,8 +90,4 @@ public class ShiroConfiguration {
         advisor.setSecurityManager(securityManager);
         return advisor;
     }
-
-
-
-
 }

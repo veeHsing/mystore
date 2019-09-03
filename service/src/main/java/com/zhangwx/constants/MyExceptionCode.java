@@ -19,9 +19,15 @@ public enum MyExceptionCode {
 
     SYS_JWT_CREATE_ERROR(-1100,"jwt创建失败"),
     SYS_JWT_PARSE_FAIL(-1101,"token无效"),
+    SYS_JWT_CANT_NULL(-1102,"token不能为空"),
+
 
     SYS_RESOURCE_NOT_EXITS(-1200,"资源不存在"),
+    SYS_RESOURCE_HAS_CHILD(-1201,"该资源还有子资源"),
 
+
+    //shiro异常
+    SYS_SHIRO_INVALID_URL(-1300,"无效的请求"),
 
 
     ;
