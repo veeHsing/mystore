@@ -1,5 +1,7 @@
 package com.zhangwx.output;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 public class SysUserListOutput {
@@ -26,6 +28,8 @@ public class SysUserListOutput {
     private Long updateBy;
 
     private Long roleId;
+
+    private String roleName;
 
     private String avatarImg;
 
@@ -85,6 +89,7 @@ public class SysUserListOutput {
         this.stat = stat;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     public Date getCreateAt() {
         return createAt;
     }
@@ -101,6 +106,7 @@ public class SysUserListOutput {
         this.createBy = createBy;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     public Date getUpdateAt() {
         return updateAt;
     }
@@ -131,5 +137,13 @@ public class SysUserListOutput {
 
     public void setAvatarImg(String avatarImg) {
         this.avatarImg = avatarImg;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
 }

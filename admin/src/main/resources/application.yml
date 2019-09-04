@@ -3,4 +3,9 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: pro
+
+# 控制台输出mysql执行语句
+logging:
+  level:
+    com.zhangwx.dao.*: debug

@@ -13,6 +13,7 @@ import com.zhangwx.output.SysUserInfoOutput;
 import com.zhangwx.output.SysUserListOutput;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SysUserService {
 
@@ -44,13 +45,21 @@ public interface SysUserService {
 
     PageInfo<SysRole> getSysRolesList(SimplePageInput simplePageInput);
 
+    List<SysRole> getSysRoles();
+
     //获取资源列表
     List<SysResourcesTree> getSysResourcesList();
-
     // 添加资源
-    Boolean addSysResource(SysResources sysResources);
+    boolean addSysResource(SysResources sysResources);
+    // 编辑资源
+    boolean updateSysResource(SysResources sysResources);
     //删除资源
-    Boolean deleteResource(SysResources sysResources);
+    boolean deleteResource(SysResources sysResources);
+
+    SysUserListOutput updateUser(SysUser sysUser);
+
+    //分配权限
+    boolean assignPermission(Map map);
 
 
 }

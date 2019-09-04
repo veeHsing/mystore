@@ -11,9 +11,9 @@
     <result column="remark" property="remark" jdbcType="VARCHAR" />
     <result column="stat" property="stat" jdbcType="TINYINT" />
     <result column="deleted" property="deleted" jdbcType="TINYINT" />
-    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="create_at" property="createAt" jdbcType="DATE" />
     <result column="create_by" property="createBy" jdbcType="BIGINT" />
-    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="DATE" />
     <result column="update_by" property="updateBy" jdbcType="BIGINT" />
     <result column="role_id" property="roleId" jdbcType="BIGINT" />
     <result column="avatar_img" property="avatarImg" jdbcType="VARCHAR" />
@@ -26,12 +26,13 @@
     <result column="phone" property="phone" jdbcType="VARCHAR" />
     <result column="remark" property="remark" jdbcType="VARCHAR" />
     <result column="stat" property="stat" jdbcType="TINYINT" />
-    <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
+    <result column="create_at" property="createAt" jdbcType="DATE" />
     <result column="create_by" property="createBy" jdbcType="BIGINT" />
-    <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
+    <result column="update_at" property="updateAt" jdbcType="DATE" />
     <result column="update_by" property="updateBy" jdbcType="BIGINT" />
     <result column="role_id" property="roleId" jdbcType="BIGINT" />
     <result column="avatar_img" property="avatarImg" jdbcType="VARCHAR" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -51,6 +52,35 @@
                 </when>
                 <when test="criterion.listValue" >
                   and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Example_Where_Clause_U" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and u.${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and u.${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and u.${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and u.${criterion.condition}
                   <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
                     #{listItem}
                   </foreach>
@@ -116,10 +146,14 @@
       distinct
     </if>
     'true' as QUERYID,
-    <include refid="Base_Column_List" />
-    from sys_user
+    u.id, u.user_name, u.nick_name, u.email, u.phone, u.remark, u.stat, u.deleted, u.create_at,
+    u.create_by, u.update_at, u.update_by, u.role_id, u.avatar_img,
+    r.`name` as role_name
+    from sys_user as u
+    left join sys_role as r on  u.role_id=r.id
     <if test="_parameter != null" >
-      <include refid="Example_Where_Clause" />
+      <include refid="Example_Where_Clause_U" >
+      </include>
     </if>
     <if test="orderByClause != null" >
       order by ${orderByClause}

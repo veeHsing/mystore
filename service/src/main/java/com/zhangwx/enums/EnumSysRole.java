@@ -1,8 +1,8 @@
 package com.zhangwx.enums;
 
 public enum EnumSysRole {
-    DELETED_NO(1,"已删除"),
-    DELETED_YES(0,"正常"),
+    DELETED_YES(1,"已删除"),
+    DELETED_NO(0,"正常"),
 
     ;
 

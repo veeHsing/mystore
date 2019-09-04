@@ -1,5 +1,7 @@
 package com.zhangwx.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 import java.util.List;
 
@@ -66,6 +68,7 @@ public class SysRole {
         this.createBy = createBy;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     public Date getCreateAt() {
         return createAt;
     }
@@ -74,6 +77,7 @@ public class SysRole {
         this.createAt = createAt;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     public Date getUpdateAt() {
         return updateAt;
     }

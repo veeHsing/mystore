@@ -32,7 +32,9 @@ public class DefinitionM {
                 map.put(m.getCode(),JWT_FILTER_NAME+","+ROLE_FILTER_NAME+"["+m.getRule()+"]");
             }
         }
-        map.put("/**",JWT_FILTER_NAME+","+ROLE_FILTER_NAME+"[forbid]");
+        //暂时只验证已经指定的
+//        map.put("/**",JWT_FILTER_NAME+","+ROLE_FILTER_NAME+"[forbid]");
+        map.put("/**",JWT_FILTER_NAME);
         System.out.println("+++++++++++++++++++++++++++++++++"+map.toString());
         return map;
 

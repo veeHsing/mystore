@@ -1,5 +1,6 @@
 package com.zhangwx.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.zhangwx.base.Result;
 import com.zhangwx.constants.MyExceptionCode;
@@ -91,15 +92,35 @@ public class SysUserController {
         return ResultsUtil.success(pageInfo);
     }
 
+    @RequestMapping("/user/update")
+    public Result updateUser(@RequestBody  SysUser sysUser ) {
+        SysUserListOutput sysUserListOutput=sysUserService.updateUser(sysUser);
+        return ResultsUtil.success(sysUserListOutput);
+    }
+
     @RequestMapping("/role_list")
     public Result getSysRolesList(@RequestBody SimplePageInput sysUserListInput){
         PageInfo<SysRole> pageInfo=sysUserService.getSysRolesList(sysUserListInput);
         return ResultsUtil.success(pageInfo);
     }
 
+    @RequestMapping("/roles")
+    public Result getSysRoles(){
+        List<SysRole> roles=sysUserService.getSysRoles();
+        return ResultsUtil.success(roles);
+    }
+
+    //资源列表调用
     @RequestMapping("/resources_list")
     public Result getSysResourcesList(){
+        long userId=UserRequest.getCurrentUserId();
+        List<SysResourcesTree> list=sysUserService.getSysResourcesList();
+        return ResultsUtil.success(list);
+    }
 
+    //权限分配调用
+    @RequestMapping("/resources_list2")
+    public Result getSysResourcesList2(@RequestParam Integer roleId){
         List<SysResourcesTree> list=sysUserService.getSysResourcesList();
         return ResultsUtil.success(list);
     }
@@ -113,6 +134,17 @@ public class SysUserController {
             return ResultsUtil.success();
         }
     }
+
+    @RequestMapping("/edit_resource")
+    public Result editSysResource(@Validated @RequestBody SysResources sysResources){
+        boolean result=sysUserService.updateSysResource(sysResources);
+        if (result){
+            return ResultsUtil.success();
+        }else {
+            return ResultsUtil.success();
+        }
+    }
+
     @RequestMapping("/delete_resource")
     public Result deleteSysResource(@RequestBody SysResources sysResources){
         boolean result=sysUserService.deleteResource(sysResources);
@@ -121,6 +153,13 @@ public class SysUserController {
         }else {
             return ResultsUtil.success();
         }
+    }
+
+    //权限分配
+    @RequestMapping("/permission/assign")
+    public Result assignPermission(@RequestBody Map map){
+        sysUserService.assignPermission(map);
+        return ResultsUtil.success();
     }
 
 }
