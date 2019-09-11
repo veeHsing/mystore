@@ -27,15 +27,9 @@ public class ShiroConfig {
         return  new MyShiroRealm();
     }
 
-    @Bean
-    public DefinitionM definitionM(){
-        return new DefinitionM();
-    }
-
-
     //配置shiro过滤器
     @Bean("shiroFilter")
-    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager) {
+    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager, MyFilterChainDefinitionMap myFilterChainDefinitionMap) {
         //1.定义shiroFactoryBean
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         //2.设置securityManager
@@ -49,7 +43,7 @@ public class ShiroConfig {
         factoryBean.setFilters(filterMap);
         //anon:所有url都可以匿名访问
         //jwt，role[admin]:首先调用jwt拦截器，通过后调用role拦截器
-        factoryBean.setFilterChainDefinitionMap(definitionM().build());
+        factoryBean.setFilterChainDefinitionMap(myFilterChainDefinitionMap.build());
         return factoryBean;
     }
 

@@ -61,5 +61,7 @@ public interface SysUserService {
     //分配权限
     boolean assignPermission(Map map);
 
+    List<Integer> getPermissionByRole(int roleId);
+
 
 }

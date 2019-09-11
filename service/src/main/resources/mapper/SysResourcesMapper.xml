@@ -3,21 +3,21 @@
 <mapper namespace="com.zhangwx.dao.SysResourcesMapper" >
   <resultMap id="BaseResultMap" type="com.zhangwx.model.SysResources" >
     <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
-    <result column="path" property="path" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
     <result column="name" property="name" jdbcType="VARCHAR" />
     <result column="component" property="component" jdbcType="VARCHAR" />
     <result column="redirect" property="redirect" jdbcType="VARCHAR" />
-    <result column="title" property="title" jdbcType="VARCHAR" />
-    <result column="icon" property="icon" jdbcType="VARCHAR" />
     <result column="type" property="type" jdbcType="INTEGER" />
     <result column="order_num" property="orderNum" jdbcType="INTEGER" />
     <result column="deleted" property="deleted" jdbcType="INTEGER" />
+    <result column="hide" property="hide" jdbcType="INTEGER" />
     <result column="create_by" property="createBy" jdbcType="INTEGER" />
     <result column="create_at" property="createAt" jdbcType="TIMESTAMP" />
     <result column="update_by" property="updateBy" jdbcType="INTEGER" />
     <result column="update_at" property="updateAt" jdbcType="TIMESTAMP" />
-    <result column="hideInMenu" property="hideinmenu" jdbcType="INTEGER" />
+    <result column="route" property="route" jdbcType="VARCHAR" />
+    <result column="parent_id" property="parentId" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -78,8 +78,8 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, parent_id, path, name, component, redirect, title, icon, type, order_num, deleted, 
-    create_by, create_at, update_by, update_at, hideInMenu
+    id, title, icon, name, component, redirect, type, order_num, deleted, hide, create_by, 
+    create_at, update_by, update_at, route, parent_id
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.zhangwx.model.SysResourcesExample" >
     select
@@ -116,17 +116,17 @@
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
       SELECT LAST_INSERT_ID()
     </selectKey>
-    insert into sys_resources (parent_id, path, name, 
-      component, redirect, title, 
-      icon, type, order_num, 
-      deleted, create_by, create_at, 
-      update_by, update_at, hideInMenu
+    insert into sys_resources (title, icon, name, 
+      component, redirect, type, 
+      order_num, deleted, hide, 
+      create_by, create_at, update_by, 
+      update_at, route, parent_id
       )
-    values (#{parentId,jdbcType=INTEGER}, #{path,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
-      #{component,jdbcType=VARCHAR}, #{redirect,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, 
-      #{icon,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{orderNum,jdbcType=INTEGER}, 
-      #{deleted,jdbcType=INTEGER}, #{createBy,jdbcType=INTEGER}, #{createAt,jdbcType=TIMESTAMP}, 
-      #{updateBy,jdbcType=INTEGER}, #{updateAt,jdbcType=TIMESTAMP}, #{hideinmenu,jdbcType=INTEGER}
+    values (#{title,jdbcType=VARCHAR}, #{icon,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{component,jdbcType=VARCHAR}, #{redirect,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+      #{orderNum,jdbcType=INTEGER}, #{deleted,jdbcType=INTEGER}, #{hide,jdbcType=INTEGER}, 
+      #{createBy,jdbcType=INTEGER}, #{createAt,jdbcType=TIMESTAMP}, #{updateBy,jdbcType=INTEGER}, 
+      #{updateAt,jdbcType=TIMESTAMP}, #{route,jdbcType=VARCHAR}, #{parentId,jdbcType=INTEGER}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.zhangwx.model.SysResources" >
@@ -135,11 +135,11 @@
     </selectKey>
     insert into sys_resources
     <trim prefix="(" suffix=")" suffixOverrides="," >
-      <if test="parentId != null" >
-        parent_id,
+      <if test="title != null" >
+        title,
       </if>
-      <if test="path != null" >
-        path,
+      <if test="icon != null" >
+        icon,
       </if>
       <if test="name != null" >
         name,
@@ -150,12 +150,6 @@
       <if test="redirect != null" >
         redirect,
       </if>
-      <if test="title != null" >
-        title,
-      </if>
-      <if test="icon != null" >
-        icon,
-      </if>
       <if test="type != null" >
         type,
       </if>
@@ -164,6 +158,9 @@
       </if>
       <if test="deleted != null" >
         deleted,
+      </if>
+      <if test="hide != null" >
+        hide,
       </if>
       <if test="createBy != null" >
         create_by,
@@ -177,16 +174,19 @@
       <if test="updateAt != null" >
         update_at,
       </if>
-      <if test="hideinmenu != null" >
-        hideInMenu,
+      <if test="route != null" >
+        route,
+      </if>
+      <if test="parentId != null" >
+        parent_id,
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
-      <if test="parentId != null" >
-        #{parentId,jdbcType=INTEGER},
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
       </if>
-      <if test="path != null" >
-        #{path,jdbcType=VARCHAR},
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
       </if>
       <if test="name != null" >
         #{name,jdbcType=VARCHAR},
@@ -197,12 +197,6 @@
       <if test="redirect != null" >
         #{redirect,jdbcType=VARCHAR},
       </if>
-      <if test="title != null" >
-        #{title,jdbcType=VARCHAR},
-      </if>
-      <if test="icon != null" >
-        #{icon,jdbcType=VARCHAR},
-      </if>
       <if test="type != null" >
         #{type,jdbcType=INTEGER},
       </if>
@@ -211,6 +205,9 @@
       </if>
       <if test="deleted != null" >
         #{deleted,jdbcType=INTEGER},
+      </if>
+      <if test="hide != null" >
+        #{hide,jdbcType=INTEGER},
       </if>
       <if test="createBy != null" >
         #{createBy,jdbcType=INTEGER},
@@ -224,8 +221,11 @@
       <if test="updateAt != null" >
         #{updateAt,jdbcType=TIMESTAMP},
       </if>
-      <if test="hideinmenu != null" >
-        #{hideinmenu,jdbcType=INTEGER},
+      <if test="route != null" >
+        #{route,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=INTEGER},
       </if>
     </trim>
   </insert>
@@ -241,11 +241,11 @@
       <if test="record.id != null" >
         id = #{record.id,jdbcType=INTEGER},
       </if>
-      <if test="record.parentId != null" >
-        parent_id = #{record.parentId,jdbcType=INTEGER},
+      <if test="record.title != null" >
+        title = #{record.title,jdbcType=VARCHAR},
       </if>
-      <if test="record.path != null" >
-        path = #{record.path,jdbcType=VARCHAR},
+      <if test="record.icon != null" >
+        icon = #{record.icon,jdbcType=VARCHAR},
       </if>
       <if test="record.name != null" >
         name = #{record.name,jdbcType=VARCHAR},
@@ -256,12 +256,6 @@
       <if test="record.redirect != null" >
         redirect = #{record.redirect,jdbcType=VARCHAR},
       </if>
-      <if test="record.title != null" >
-        title = #{record.title,jdbcType=VARCHAR},
-      </if>
-      <if test="record.icon != null" >
-        icon = #{record.icon,jdbcType=VARCHAR},
-      </if>
       <if test="record.type != null" >
         type = #{record.type,jdbcType=INTEGER},
       </if>
@@ -270,6 +264,9 @@
       </if>
       <if test="record.deleted != null" >
         deleted = #{record.deleted,jdbcType=INTEGER},
+      </if>
+      <if test="record.hide != null" >
+        hide = #{record.hide,jdbcType=INTEGER},
       </if>
       <if test="record.createBy != null" >
         create_by = #{record.createBy,jdbcType=INTEGER},
@@ -283,8 +280,11 @@
       <if test="record.updateAt != null" >
         update_at = #{record.updateAt,jdbcType=TIMESTAMP},
       </if>
-      <if test="record.hideinmenu != null" >
-        hideInMenu = #{record.hideinmenu,jdbcType=INTEGER},
+      <if test="record.route != null" >
+        route = #{record.route,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parentId != null" >
+        parent_id = #{record.parentId,jdbcType=INTEGER},
       </if>
     </set>
     <if test="_parameter != null" >
@@ -294,21 +294,21 @@
   <update id="updateByExample" parameterType="map" >
     update sys_resources
     set id = #{record.id,jdbcType=INTEGER},
-      parent_id = #{record.parentId,jdbcType=INTEGER},
-      path = #{record.path,jdbcType=VARCHAR},
+      title = #{record.title,jdbcType=VARCHAR},
+      icon = #{record.icon,jdbcType=VARCHAR},
       name = #{record.name,jdbcType=VARCHAR},
       component = #{record.component,jdbcType=VARCHAR},
       redirect = #{record.redirect,jdbcType=VARCHAR},
-      title = #{record.title,jdbcType=VARCHAR},
-      icon = #{record.icon,jdbcType=VARCHAR},
       type = #{record.type,jdbcType=INTEGER},
       order_num = #{record.orderNum,jdbcType=INTEGER},
       deleted = #{record.deleted,jdbcType=INTEGER},
+      hide = #{record.hide,jdbcType=INTEGER},
       create_by = #{record.createBy,jdbcType=INTEGER},
       create_at = #{record.createAt,jdbcType=TIMESTAMP},
       update_by = #{record.updateBy,jdbcType=INTEGER},
       update_at = #{record.updateAt,jdbcType=TIMESTAMP},
-      hideInMenu = #{record.hideinmenu,jdbcType=INTEGER}
+      route = #{record.route,jdbcType=VARCHAR},
+      parent_id = #{record.parentId,jdbcType=INTEGER}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -316,11 +316,11 @@
   <update id="updateByPrimaryKeySelective" parameterType="com.zhangwx.model.SysResources" >
     update sys_resources
     <set >
-      <if test="parentId != null" >
-        parent_id = #{parentId,jdbcType=INTEGER},
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
       </if>
-      <if test="path != null" >
-        path = #{path,jdbcType=VARCHAR},
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
       </if>
       <if test="name != null" >
         name = #{name,jdbcType=VARCHAR},
@@ -331,12 +331,6 @@
       <if test="redirect != null" >
         redirect = #{redirect,jdbcType=VARCHAR},
       </if>
-      <if test="title != null" >
-        title = #{title,jdbcType=VARCHAR},
-      </if>
-      <if test="icon != null" >
-        icon = #{icon,jdbcType=VARCHAR},
-      </if>
       <if test="type != null" >
         type = #{type,jdbcType=INTEGER},
       </if>
@@ -345,6 +339,9 @@
       </if>
       <if test="deleted != null" >
         deleted = #{deleted,jdbcType=INTEGER},
+      </if>
+      <if test="hide != null" >
+        hide = #{hide,jdbcType=INTEGER},
       </if>
       <if test="createBy != null" >
         create_by = #{createBy,jdbcType=INTEGER},
@@ -358,29 +355,32 @@
       <if test="updateAt != null" >
         update_at = #{updateAt,jdbcType=TIMESTAMP},
       </if>
-      <if test="hideinmenu != null" >
-        hideInMenu = #{hideinmenu,jdbcType=INTEGER},
+      <if test="route != null" >
+        route = #{route,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        parent_id = #{parentId,jdbcType=INTEGER},
       </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.zhangwx.model.SysResources" >
     update sys_resources
-    set parent_id = #{parentId,jdbcType=INTEGER},
-      path = #{path,jdbcType=VARCHAR},
+    set title = #{title,jdbcType=VARCHAR},
+      icon = #{icon,jdbcType=VARCHAR},
       name = #{name,jdbcType=VARCHAR},
       component = #{component,jdbcType=VARCHAR},
       redirect = #{redirect,jdbcType=VARCHAR},
-      title = #{title,jdbcType=VARCHAR},
-      icon = #{icon,jdbcType=VARCHAR},
       type = #{type,jdbcType=INTEGER},
       order_num = #{orderNum,jdbcType=INTEGER},
       deleted = #{deleted,jdbcType=INTEGER},
+      hide = #{hide,jdbcType=INTEGER},
       create_by = #{createBy,jdbcType=INTEGER},
       create_at = #{createAt,jdbcType=TIMESTAMP},
       update_by = #{updateBy,jdbcType=INTEGER},
       update_at = #{updateAt,jdbcType=TIMESTAMP},
-      hideInMenu = #{hideinmenu,jdbcType=INTEGER}
+      route = #{route,jdbcType=VARCHAR},
+      parent_id = #{parentId,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

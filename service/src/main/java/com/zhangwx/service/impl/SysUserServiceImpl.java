@@ -29,6 +29,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -143,7 +144,6 @@ public class SysUserServiceImpl implements SysUserService {
         List<MenuOutput> menuOutputList = new ArrayList<>();
         for (SysResources resources : list) {
             MenuOutput menu = new MenuOutput();
-            menu.setPath(resources.getPath());
             menu.setRedirect(resources.getRedirect());
             menu.setName(resources.getName());
             if (resources.getType() == EnumSysResources.TYPE_DIR.getCode()) {
@@ -238,7 +238,11 @@ public class SysUserServiceImpl implements SysUserService {
         sysResources.setCreateBy((int) UserRequest.getCurrentUserId());
         sysResources.setCreateAt(new Date());
         sysResources.setUpdateAt(new Date());
-        sysResources.setHideinmenu(EnumSysResources.HIDDEN_NO.getCode());
+        if (sysResources.getType() == EnumSysResources.TYPE_BUTTON.getCode()) {
+            sysResources.setHide(EnumSysResources.HIDDEN_YES.getCode());
+        } else {
+            sysResources.setHide(EnumSysResources.HIDDEN_NO.getCode());
+        }
         int bool = sysResourcesMapper.insert(sysResources);
         if (bool >= 1) {
             return true;
@@ -251,7 +255,6 @@ public class SysUserServiceImpl implements SysUserService {
     public boolean updateSysResource(SysResources sysResources) {
         Optional.ofNullable(sysResources).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
         int bool = sysResourcesMapper.updateByPrimaryKey(sysResources);
-        logger.info("=========+" + bool);
         if (bool >= 1) {
             return true;
         } else {
@@ -289,15 +292,15 @@ public class SysUserServiceImpl implements SysUserService {
     @Override
     public SysUserListOutput updateUser(SysUser sysUser) {
         Optional.ofNullable(sysUser).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
-        SysUser sysUserOld=sysUserMapper.selectByPrimaryKey(sysUser.getId());
+        SysUser sysUserOld = sysUserMapper.selectByPrimaryKey(sysUser.getId());
         Optional.ofNullable(sysUserOld).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_USER_NOT_EXIST));
         sysUserOld.setRoleId(sysUser.getRoleId());
         int bool = sysUserMapper.updateByPrimaryKey(sysUserOld);
         logger.info("=========+" + bool);
         if (bool >= 1) {
-            SysRole sysRole=sysRoleMapper.selectByPrimaryKey(sysUser.getRoleId());
-            SysUserListOutput sysUserListOutput=new SysUserListOutput();
-            BeanUtils.copyProperties(sysUserOld,sysUserListOutput);
+            SysRole sysRole = sysRoleMapper.selectByPrimaryKey(sysUser.getRoleId());
+            SysUserListOutput sysUserListOutput = new SysUserListOutput();
+            BeanUtils.copyProperties(sysUserOld, sysUserListOutput);
             sysUserListOutput.setRoleName(sysRole.getName());
             return sysUserListOutput;
         } else {
@@ -306,9 +309,44 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    @Transactional
     public boolean assignPermission(Map map) {
-        int roleId=(int)map.get("roleId");
-        List<Integer> keys=(List<Integer>) map.get("keys");
-        return false;
+        int roleId = (int) map.get("roleId");
+        List<Integer> keys = (List<Integer>) map.get("keys");
+        if (roleId == 0 || keys.size() == 0) {
+            throw new ServiceException("没有选择角色或没有勾选权限");
+        }
+        SysRoleResourcesExample example = new SysRoleResourcesExample();
+        SysRoleResourcesExample.Criteria criteria = example.createCriteria();
+        criteria.andRoleIdEqualTo((long) roleId);
+        sysRoleResourcesMapper.deleteByExample(example);
+        for (int resourceId : keys) {
+            SysRoleResources sysRoleResources = new SysRoleResources();
+            sysRoleResources.setRoleId((long) roleId);
+            sysRoleResources.setResourceId((long) resourceId);
+            sysRoleResources.setDeleted((byte) 0);
+            sysRoleResources.setCreateAt(new Date());
+            sysRoleResources.setCreateBy(UserRequest.getCurrentUserId());
+            SysResources sysResources = sysResourcesMapper.selectByPrimaryKey(resourceId);
+            sysRoleResources.setParentId(sysResources.getParentId().longValue());
+            sysRoleResourcesMapper.insertSelective(sysRoleResources);
+        }
+        return true;
+    }
+
+    @Override
+    public List<Integer> getPermissionByRole(int roleId) {
+        SysRoleResourcesExample example = new SysRoleResourcesExample();
+        SysRoleResourcesExample.Criteria criteria = example.createCriteria();
+        criteria.andRoleIdEqualTo((long) roleId);
+        List<SysRoleResources> list = sysRoleResourcesMapper.selectByExample(example);
+        List<Integer> checkKeys = new ArrayList<>();
+        for (SysRoleResources sysRoleResources : list) {
+            if (StringUtils.isEmpty(sysRoleResources.getResourceId())) {
+                continue;
+            }
+            checkKeys.add(sysRoleResources.getResourceId().intValue());
+        }
+        return checkKeys;
     }
 }

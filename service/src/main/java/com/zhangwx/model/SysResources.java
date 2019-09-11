@@ -5,9 +5,9 @@ import java.util.Date;
 public class SysResources {
     private Integer id;
 
-    private Integer parentId;
+    private String title;
 
-    private String path;
+    private String icon;
 
     private String name;
 
@@ -15,15 +15,13 @@ public class SysResources {
 
     private String redirect;
 
-    private String title;
-
-    private String icon;
-
     private Integer type;
 
     private Integer orderNum;
 
     private Integer deleted;
+
+    private Integer hide;
 
     private Integer createBy;
 
@@ -33,7 +31,9 @@ public class SysResources {
 
     private Date updateAt;
 
-    private Integer hideinmenu;
+    private String route;
+
+    private Integer parentId;
 
     public Integer getId() {
         return id;
@@ -43,20 +43,20 @@ public class SysResources {
         this.id = id;
     }
 
-    public Integer getParentId() {
-        return parentId;
+    public String getTitle() {
+        return title;
     }
 
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
+    public void setTitle(String title) {
+        this.title = title == null ? null : title.trim();
     }
 
-    public String getPath() {
-        return path;
+    public String getIcon() {
+        return icon;
     }
 
-    public void setPath(String path) {
-        this.path = path == null ? null : path.trim();
+    public void setIcon(String icon) {
+        this.icon = icon == null ? null : icon.trim();
     }
 
     public String getName() {
@@ -83,22 +83,6 @@ public class SysResources {
         this.redirect = redirect == null ? null : redirect.trim();
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title == null ? null : title.trim();
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon == null ? null : icon.trim();
-    }
-
     public Integer getType() {
         return type;
     }
@@ -121,6 +105,14 @@ public class SysResources {
 
     public void setDeleted(Integer deleted) {
         this.deleted = deleted;
+    }
+
+    public Integer getHide() {
+        return hide;
+    }
+
+    public void setHide(Integer hide) {
+        this.hide = hide;
     }
 
     public Integer getCreateBy() {
@@ -155,11 +147,19 @@ public class SysResources {
         this.updateAt = updateAt;
     }
 
-    public Integer getHideinmenu() {
-        return hideinmenu;
+    public String getRoute() {
+        return route;
     }
 
-    public void setHideinmenu(Integer hideinmenu) {
-        this.hideinmenu = hideinmenu;
+    public void setRoute(String route) {
+        this.route = route == null ? null : route.trim();
+    }
+
+    public Integer getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 }

@@ -1,10 +1,8 @@
 package com.zhangwx.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.zhangwx.base.Result;
 import com.zhangwx.constants.MyExceptionCode;
-import com.zhangwx.enums.EnumSysUser;
 import com.zhangwx.input.LoginInput;
 import com.zhangwx.input.SimplePageInput;
 import com.zhangwx.input.SysUserListInput;
@@ -15,10 +13,12 @@ import com.zhangwx.output.SysResourcesTree;
 import com.zhangwx.output.SysUserInfoOutput;
 import com.zhangwx.output.SysUserListOutput;
 import com.zhangwx.service.SysUserService;
+import com.zhangwx.shiro.MyFilterChainDefinitionMap;
 import com.zhangwx.util.ResultsUtil;
 import com.zhangwx.util.UserRequest;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,122 +44,132 @@ public class SysUserController {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @RequestMapping("/user")
-    public Result findOne(HttpServletRequest request){
+    public Result findOne(HttpServletRequest request) {
         Subject currentUser = SecurityUtils.getSubject();
-
         Session session = currentUser.getSession();
-
         System.out.println(session);
-        return  ResultsUtil.success(sysUserService.selectByPrimaryKey(1l));
+        return ResultsUtil.success(sysUserService.selectByPrimaryKey(1l));
     }
 
     /**
      * 登录获取认证
+     *
      * @param loginInput
      * @return
      */
     @RequestMapping("/login")
-    public Result login(@Validated  @RequestBody LoginInput loginInput){
+    public Result login(@Validated @RequestBody LoginInput loginInput) {
         System.out.println(loginInput);
-        String token=sysUserService.login(loginInput);
-        if (token != null){
-            Map t=new HashMap();
-            t.put("access_token",token);
-            return ResultsUtil.success("登录成功!",t);
-        }else {
+        String token = sysUserService.login(loginInput);
+        if (token != null) {
+            Map t = new HashMap();
+            t.put("access_token", token);
+            return ResultsUtil.success("登录成功!", t);
+        } else {
             return ResultsUtil.failure("登录失败!");
         }
     }
 
     @RequestMapping("/logout")
-    public Result logout(){
+    public Result logout() {
         return ResultsUtil.success();
     }
 
     @RequestMapping("/info")
-    public Result getUserInfo(){
-        SysUserInfoOutput output=sysUserService.getInfo();
+    public Result getUserInfo() {
+        SysUserInfoOutput output = sysUserService.getInfo();
 //        logger.info(sysUser.getUserName());
-        if (output != null){
+        if (output != null) {
             return ResultsUtil.success(output);
         }
         return ResultsUtil.failure(MyExceptionCode.SYS_USER_NOT_EXIST);
     }
 
-    @RequestMapping("/user_list")
-    public Result getSysUserList(@RequestBody SysUserListInput sysUserListInput){
-        PageInfo<SysUserListOutput> pageInfo=sysUserService.getSysUserList(sysUserListInput);
+    @RequestMapping("/user/list")
+    public Result getSysUserList(@RequestBody SysUserListInput sysUserListInput) {
+        PageInfo<SysUserListOutput> pageInfo = sysUserService.getSysUserList(sysUserListInput);
         return ResultsUtil.success(pageInfo);
     }
 
-    @RequestMapping("/user/update")
-    public Result updateUser(@RequestBody  SysUser sysUser ) {
-        SysUserListOutput sysUserListOutput=sysUserService.updateUser(sysUser);
+    @RequestMapping("/user/edit")
+    public Result updateUser(@RequestBody SysUser sysUser) {
+        SysUserListOutput sysUserListOutput = sysUserService.updateUser(sysUser);
         return ResultsUtil.success(sysUserListOutput);
     }
 
-    @RequestMapping("/role_list")
-    public Result getSysRolesList(@RequestBody SimplePageInput sysUserListInput){
-        PageInfo<SysRole> pageInfo=sysUserService.getSysRolesList(sysUserListInput);
+    @RequestMapping("/role/list")
+    public Result getSysRolesList(@RequestBody SimplePageInput sysUserListInput) {
+        PageInfo<SysRole> pageInfo = sysUserService.getSysRolesList(sysUserListInput);
         return ResultsUtil.success(pageInfo);
     }
 
     @RequestMapping("/roles")
-    public Result getSysRoles(){
-        List<SysRole> roles=sysUserService.getSysRoles();
+    public Result getSysRoles() {
+        List<SysRole> roles = sysUserService.getSysRoles();
         return ResultsUtil.success(roles);
     }
 
     //资源列表调用
-    @RequestMapping("/resources_list")
-    public Result getSysResourcesList(){
-        long userId=UserRequest.getCurrentUserId();
-        List<SysResourcesTree> list=sysUserService.getSysResourcesList();
+    @RequestMapping("/resources/list")
+    public Result getSysResourcesList() {
+        long userId = UserRequest.getCurrentUserId();
+        List<SysResourcesTree> list = sysUserService.getSysResourcesList();
         return ResultsUtil.success(list);
     }
 
     //权限分配调用
-    @RequestMapping("/resources_list2")
-    public Result getSysResourcesList2(@RequestParam Integer roleId){
-        List<SysResourcesTree> list=sysUserService.getSysResourcesList();
+    @RequestMapping("/resources/list2")
+    public Result getSysResourcesList2(@RequestParam Integer roleId) {
+        List<SysResourcesTree> list = sysUserService.getSysResourcesList();
         return ResultsUtil.success(list);
     }
 
-    @RequestMapping("/add_resource")
-    public Result addSysResource(@Validated @RequestBody SysResources sysResources){
-        boolean result=sysUserService.addSysResource(sysResources);
-        if (result){
+    @RequestMapping("/resources/add")
+    public Result addSysResource(@Validated @RequestBody SysResources sysResources) {
+        boolean result = sysUserService.addSysResource(sysResources);
+        if (result) {
             return ResultsUtil.success();
-        }else {
-            return ResultsUtil.success();
-        }
-    }
-
-    @RequestMapping("/edit_resource")
-    public Result editSysResource(@Validated @RequestBody SysResources sysResources){
-        boolean result=sysUserService.updateSysResource(sysResources);
-        if (result){
-            return ResultsUtil.success();
-        }else {
+        } else {
             return ResultsUtil.success();
         }
     }
 
-    @RequestMapping("/delete_resource")
-    public Result deleteSysResource(@RequestBody SysResources sysResources){
-        boolean result=sysUserService.deleteResource(sysResources);
-        if (result){
+    @RequestMapping("/resources/edit")
+    public Result editSysResource(@Validated @RequestBody SysResources sysResources) {
+        boolean result = sysUserService.updateSysResource(sysResources);
+        if (result) {
             return ResultsUtil.success();
-        }else {
+        } else {
             return ResultsUtil.success();
         }
     }
 
+    @RequestMapping("/resources/delete")
+    public Result deleteSysResource(@RequestBody SysResources sysResources) {
+        boolean result = sysUserService.deleteResource(sysResources);
+        if (result) {
+            return ResultsUtil.success();
+        } else {
+            return ResultsUtil.success();
+        }
+    }
+    @Autowired
+    private MyFilterChainDefinitionMap myFilterChainDefinitionMap;
+    @Autowired
+    private  ShiroFilterFactoryBean shiroFilterFactoryBean;
     //权限分配
     @RequestMapping("/permission/assign")
-    public Result assignPermission(@RequestBody Map map){
+    public Result assignPermission(@RequestBody Map map) {
         sysUserService.assignPermission(map);
+        myFilterChainDefinitionMap.updatePermission(shiroFilterFactoryBean);
         return ResultsUtil.success();
+    }
+
+    //根据角色id获取权限
+    @RequestMapping("/permission/checked_keys")
+    public Result getPermissionByRole(@RequestBody Map map) {
+        List<Integer> list = sysUserService.getPermissionByRole((int) map.get("roleId"));
+        return ResultsUtil.success(list);
     }
 
 }
