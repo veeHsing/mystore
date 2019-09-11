@@ -9,6 +9,7 @@ import org.apache.shiro.web.servlet.AbstractShiroFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -20,8 +21,8 @@ import java.util.Map;
  * url拦截
  * 规则设置
  */
-@Service
-public class MyFilterChainDefinitionMap {
+@Component
+public class MyFilterChainDefinitions {
 
     private static final String JWT_FILTER_NAME = "jwt";
     private static final String ROLE_FILTER_NAME = "role";

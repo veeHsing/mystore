@@ -13,7 +13,7 @@ import com.zhangwx.output.SysResourcesTree;
 import com.zhangwx.output.SysUserInfoOutput;
 import com.zhangwx.output.SysUserListOutput;
 import com.zhangwx.service.SysUserService;
-import com.zhangwx.shiro.MyFilterChainDefinitionMap;
+import com.zhangwx.shiro.MyFilterChainDefinitions;
 import com.zhangwx.util.ResultsUtil;
 import com.zhangwx.util.UserRequest;
 import org.apache.shiro.SecurityUtils;
@@ -154,14 +154,14 @@ public class SysUserController {
         }
     }
     @Autowired
-    private MyFilterChainDefinitionMap myFilterChainDefinitionMap;
+    private MyFilterChainDefinitions myFilterChainDefinitions;
     @Autowired
     private  ShiroFilterFactoryBean shiroFilterFactoryBean;
     //权限分配
     @RequestMapping("/permission/assign")
     public Result assignPermission(@RequestBody Map map) {
         sysUserService.assignPermission(map);
-        myFilterChainDefinitionMap.updatePermission(shiroFilterFactoryBean);
+        myFilterChainDefinitions.updatePermission(shiroFilterFactoryBean);
         return ResultsUtil.success();
     }
 
