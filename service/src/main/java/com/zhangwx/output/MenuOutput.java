@@ -10,7 +10,8 @@ public class MenuOutput {
     private String path;//路由
     private String redirect;//重定向路由
     private String name;//路由名称
-    private Meta meta;
+    private String component;//组件名
+    public Meta meta;
     private List<MenuOutput> children;
 
 
@@ -38,6 +39,14 @@ public class MenuOutput {
         this.name = name;
     }
 
+    public String getComponent() {
+        return component;
+    }
+
+    public void setComponent(String component) {
+        this.component = component;
+    }
+
     public Meta getMeta() {
         return meta;
     }
@@ -54,7 +63,7 @@ public class MenuOutput {
         this.children = children;
     }
 
-    class Meta{
+    public class Meta{
         private String title;
         private String icon;
 

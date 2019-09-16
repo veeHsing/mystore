@@ -10,6 +10,7 @@ import com.zhangwx.dao.SysUserMapper;
 import com.zhangwx.enums.EnumSysResources;
 import com.zhangwx.enums.EnumSysRole;
 import com.zhangwx.enums.EnumSysRoleResources;
+import com.zhangwx.enums.EnumSysUser;
 import com.zhangwx.exception.ServiceException;
 import com.zhangwx.input.LoginInput;
 import com.zhangwx.input.SimplePageInput;
@@ -23,6 +24,8 @@ import com.zhangwx.service.SysUserService;
 import com.zhangwx.service.TokenService;
 import com.zhangwx.util.MD5Util;
 import com.zhangwx.util.UserRequest;
+import org.apache.catalina.User;
+import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -184,6 +187,35 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    public int addRole(SysRole sysRole) {
+        Optional.ofNullable(sysRole).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
+        sysRole.setCreateAt(new Date());
+        sysRole.setCreateBy(UserRequest.getCurrentUserId());
+        sysRole.setDeleted((byte) EnumSysRole.DELETED_NO.getCode());
+        return sysRoleMapper.insertSelective(sysRole);
+    }
+
+    @Override
+    public int updateRole(SysRole sysRole) {
+        Optional.ofNullable(sysRole).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
+        SysRole sysRoleOld = sysRoleMapper.selectByPrimaryKey(sysRole.getId());
+        Optional.ofNullable(sysRoleOld).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_ROLE_NOT_EXIST));
+        sysRole.setUpdateAt(new Date());
+        sysRole.setUpdateBy(UserRequest.getCurrentUserId());
+        return sysRoleMapper.updateByPrimaryKeySelective(sysRole);
+    }
+
+    @Override
+    public int deleteRole(long id) {
+        SysRole sysRoleOld = sysRoleMapper.selectByPrimaryKey(id);
+        Optional.ofNullable(sysRoleOld).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_ROLE_NOT_EXIST));
+        sysRoleOld.setUpdateAt(new Date());
+        sysRoleOld.setUpdateBy(UserRequest.getCurrentUserId());
+        sysRoleOld.setDeleted((byte)EnumSysRole.DELETED_YES.getCode());
+        return sysRoleMapper.updateByPrimaryKeySelective(sysRoleOld);
+    }
+
+    @Override
     public List<SysRole> getSysRoles() {
         SysRoleExample example = new SysRoleExample();
         SysRoleExample.Criteria criteria = example.createCriteria();
@@ -290,12 +322,34 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    public boolean addUser(SysUser sysUser) {
+        Optional.ofNullable(sysUser).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
+        if (!StringUtils.isEmpty(sysUser.getPassword())) {
+            sysUser.setPassword(MD5Util.getMD5(sysUser.getPassword()));
+        }
+        sysUser.setStat((byte) EnumSysUser.enableStatus.getStatus());
+        sysUser.setDeleted((byte) EnumSysUser.DELETED_NO.getStatus());
+        sysUser.setCreateAt(new Date());
+        sysUser.setCreateBy(UserRequest.getCurrentUserId());
+        int res = sysUserMapper.insertSelective(sysUser);
+        if (res > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public SysUserListOutput updateUser(SysUser sysUser) {
         Optional.ofNullable(sysUser).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_HTTP_MESSAGE));
         SysUser sysUserOld = sysUserMapper.selectByPrimaryKey(sysUser.getId());
         Optional.ofNullable(sysUserOld).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_USER_NOT_EXIST));
-        sysUserOld.setRoleId(sysUser.getRoleId());
-        int bool = sysUserMapper.updateByPrimaryKey(sysUserOld);
+        if (!StringUtils.isEmpty(sysUser.getPassword())) {
+            sysUser.setPassword(MD5Util.getMD5(sysUser.getPassword()));
+        }
+        sysUser.setUpdateAt(new Date());
+        sysUser.setUpdateBy(UserRequest.getCurrentUserId());
+        int bool = sysUserMapper.updateByPrimaryKeySelective(sysUser);
         logger.info("=========+" + bool);
         if (bool >= 1) {
             SysRole sysRole = sysRoleMapper.selectByPrimaryKey(sysUser.getRoleId());
@@ -306,6 +360,14 @@ public class SysUserServiceImpl implements SysUserService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public int deleteUser(long id) {
+        SysUser sysUserOld = sysUserMapper.selectByPrimaryKey(id);
+        Optional.ofNullable(sysUserOld).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_USER_NOT_EXIST));
+        sysUserOld.setDeleted((byte) EnumSysUser.DELETED_YES.getStatus());
+        return sysUserMapper.updateByPrimaryKey(sysUserOld);
     }
 
     @Override
@@ -348,5 +410,58 @@ public class SysUserServiceImpl implements SysUserService {
             checkKeys.add(sysRoleResources.getResourceId().intValue());
         }
         return checkKeys;
+    }
+
+    @Override
+    public List<MenuOutput> getAsyncRoutes() {
+
+        //1遍历菜单
+        List<SysResourcesTree> treeList = getSysResourcesList();
+        List<MenuOutput> finalList = new ArrayList<>();
+        for (SysResourcesTree o : treeList) {
+            MenuOutput dir = new MenuOutput();
+            dir.setPath("/" + o.getName());
+            dir.setName(o.getName());
+            MenuOutput.Meta metaDir = new MenuOutput().new Meta();
+            metaDir.setTitle(o.getTitle());
+            metaDir.setIcon(o.getIcon());
+            dir.setMeta(metaDir);
+            if (o.getChildren() != null) {
+                List<MenuOutput> menuList = new ArrayList<>();
+                for (SysResources s : o.getChildren()) {
+                    if (isResourceShow(s.getId())) {
+                        MenuOutput menu = new MenuOutput();
+                        menu.setPath("/" + o.getName() + "/" + s.getName());
+                        menu.setName(o.getName() + "_" + s.getName());
+                        menu.setComponent(s.getComponent());
+                        MenuOutput.Meta meta = new MenuOutput().new Meta();
+                        meta.setTitle(s.getTitle());
+                        meta.setIcon(s.getIcon());
+                        menu.setMeta(meta);
+                        menuList.add(menu);
+                    }
+                }
+                dir.setChildren(menuList);
+            }
+            finalList.add(dir);
+        }
+        return finalList;
+    }
+
+    //菜单是否显示
+    private boolean isResourceShow(Integer resourceId) {
+        SysRoleResourcesExample example = new SysRoleResourcesExample();
+        SysRoleResourcesExample.Criteria criteria = example.createCriteria();
+        criteria.andRoleIdEqualTo(UserRequest.getCurrentRoleId());
+        criteria.andResourceIdEqualTo((long) resourceId);
+        SysRoleResourcesExample.Criteria criteria2 = example.createCriteria();
+        criteria2.andRoleIdEqualTo(UserRequest.getCurrentRoleId());
+        criteria2.andParentIdEqualTo((long) resourceId);
+        example.or(criteria2);
+        List<SysRoleResources> list = sysRoleResourcesMapper.selectByExample(example);
+        if (list.size() > 0) {
+            return true;
+        }
+        return false;
     }
 }

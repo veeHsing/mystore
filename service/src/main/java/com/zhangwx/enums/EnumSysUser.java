@@ -3,6 +3,9 @@ package com.zhangwx.enums;
 public enum EnumSysUser {
     disableStatus(0,"冻结"),
     enableStatus(1,"正常"),
+
+    DELETED_YES(1,"已删除"),
+    DELETED_NO(0,"未删除"),
     ;
 
     private int status;

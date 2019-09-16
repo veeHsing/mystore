@@ -9,6 +9,7 @@ import com.zhangwx.input.SysUserListInput;
 import com.zhangwx.model.SysResources;
 import com.zhangwx.model.SysRole;
 import com.zhangwx.model.SysUser;
+import com.zhangwx.output.MenuOutput;
 import com.zhangwx.output.SysResourcesTree;
 import com.zhangwx.output.SysUserInfoOutput;
 import com.zhangwx.output.SysUserListOutput;
@@ -24,10 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -91,16 +89,61 @@ public class SysUserController {
         return ResultsUtil.success(pageInfo);
     }
 
+    @RequestMapping("/user/add")
+    public Result addUser(@RequestBody SysUser sysUser) {
+        boolean res = sysUserService.addUser(sysUser);
+        if (res){
+            return ResultsUtil.success();
+        }
+       return ResultsUtil.failure();
+    }
+
     @RequestMapping("/user/edit")
     public Result updateUser(@RequestBody SysUser sysUser) {
         SysUserListOutput sysUserListOutput = sysUserService.updateUser(sysUser);
         return ResultsUtil.success(sysUserListOutput);
     }
 
+    @RequestMapping(value = "/user/delete/{id}",method = RequestMethod.DELETE)
+    public Result deleteUser(@PathVariable long id) {
+        int res = sysUserService.deleteUser(id);
+        if (res > 0){
+            return ResultsUtil.success();
+        }
+        return ResultsUtil.failure();
+    }
+
     @RequestMapping("/role/list")
     public Result getSysRolesList(@RequestBody SimplePageInput sysUserListInput) {
         PageInfo<SysRole> pageInfo = sysUserService.getSysRolesList(sysUserListInput);
         return ResultsUtil.success(pageInfo);
+    }
+
+    @RequestMapping("/role/add")
+    public Result addRole(@Validated(value = {SysRole.add.class}) @RequestBody SysRole sysRole) {
+        int res = sysUserService.addRole(sysRole);
+        if (res > 0){
+            return ResultsUtil.success();
+        }
+        return ResultsUtil.failure();
+    }
+
+    @RequestMapping("/role/update")
+    public Result updateRole(@Validated(value = {SysRole.update.class}) @RequestBody SysRole sysRole) {
+        int res  = sysUserService.updateRole(sysRole);
+        if (res > 0){
+            return ResultsUtil.success();
+        }
+        return ResultsUtil.failure();
+    }
+
+    @RequestMapping("/role/delete/{id}")
+    public Result deleteRole(@PathVariable long id) {
+        int res = sysUserService.deleteRole(id);
+        if (res > 0){
+            return ResultsUtil.success();
+        }
+        return ResultsUtil.failure();
     }
 
     @RequestMapping("/roles")
@@ -169,6 +212,13 @@ public class SysUserController {
     @RequestMapping("/permission/checked_keys")
     public Result getPermissionByRole(@RequestBody Map map) {
         List<Integer> list = sysUserService.getPermissionByRole((int) map.get("roleId"));
+        return ResultsUtil.success(list);
+    }
+
+    //前端路由
+    @RequestMapping("/permission/getAsyncRoutes")
+    public Result getAsyncRoutes(){
+        List<MenuOutput> list=sysUserService.getAsyncRoutes();
         return ResultsUtil.success(list);
     }
 
