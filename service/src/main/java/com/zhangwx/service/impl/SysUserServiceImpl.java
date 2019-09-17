@@ -24,8 +24,6 @@ import com.zhangwx.service.SysUserService;
 import com.zhangwx.service.TokenService;
 import com.zhangwx.util.MD5Util;
 import com.zhangwx.util.UserRequest;
-import org.apache.catalina.User;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -211,7 +209,7 @@ public class SysUserServiceImpl implements SysUserService {
         Optional.ofNullable(sysRoleOld).orElseThrow(() -> new ServiceException(MyExceptionCode.SYS_ROLE_NOT_EXIST));
         sysRoleOld.setUpdateAt(new Date());
         sysRoleOld.setUpdateBy(UserRequest.getCurrentUserId());
-        sysRoleOld.setDeleted((byte)EnumSysRole.DELETED_YES.getCode());
+        sysRoleOld.setDeleted((byte) EnumSysRole.DELETED_YES.getCode());
         return sysRoleMapper.updateByPrimaryKeySelective(sysRoleOld);
     }
 
@@ -419,6 +417,9 @@ public class SysUserServiceImpl implements SysUserService {
         List<SysResourcesTree> treeList = getSysResourcesList();
         List<MenuOutput> finalList = new ArrayList<>();
         for (SysResourcesTree o : treeList) {
+            if(!isResourceShow(o.getId())){
+                continue;
+            }
             MenuOutput dir = new MenuOutput();
             dir.setPath("/" + o.getName());
             dir.setName(o.getName());

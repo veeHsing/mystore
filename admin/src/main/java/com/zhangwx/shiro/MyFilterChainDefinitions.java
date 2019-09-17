@@ -38,6 +38,7 @@ public class MyFilterChainDefinitions {
         LinkedHashMap<String,String> map=new LinkedHashMap<>();
         map.put("/system/login","anon");//不受拦截
         map.put("/system/logout","anon");
+        map.put("/system/allUrl","anon");
         for (SysRoleResouresMap m : definitionMap){
             if (!StringUtils.isEmpty(m.getCode())){
                 //拦截m.getCode()的请求，进入jwt和role过滤器判断是否合法
