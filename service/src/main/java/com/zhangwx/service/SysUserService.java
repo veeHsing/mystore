@@ -2,6 +2,7 @@ package com.zhangwx.service;
 
 import com.github.pagehelper.PageInfo;
 import com.zhangwx.input.LoginInput;
+import com.zhangwx.input.ResourcePermissionInput;
 import com.zhangwx.input.SimplePageInput;
 import com.zhangwx.input.SysUserListInput;
 import com.zhangwx.model.SysResources;
@@ -82,5 +83,10 @@ public interface SysUserService {
 
     List<MenuOutput> getAsyncRoutes();
 
+    List<String> getAllUrl();
+
+    List<String> getAllUrlByResourceID(long resourceId);
+
+    int assignPermission(ResourcePermissionInput input);
 
 }

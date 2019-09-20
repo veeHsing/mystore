@@ -1,10 +1,10 @@
 package com.zhangwx.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageInfo;
 import com.zhangwx.base.Result;
 import com.zhangwx.constants.MyExceptionCode;
 import com.zhangwx.input.LoginInput;
+import com.zhangwx.input.ResourcePermissionInput;
 import com.zhangwx.input.SimplePageInput;
 import com.zhangwx.input.SysUserListInput;
 import com.zhangwx.model.SysResources;
@@ -18,6 +18,7 @@ import com.zhangwx.service.SysUserService;
 import com.zhangwx.shiro.MyFilterChainDefinitions;
 import com.zhangwx.util.ResultsUtil;
 import com.zhangwx.util.UserRequest;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -27,15 +28,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
-import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/system")
@@ -43,6 +40,11 @@ public class SysUserController {
 
     @Autowired
     private SysUserService sysUserService;
+    @Autowired
+    private MyFilterChainDefinitions myFilterChainDefinitions;
+
+    @Autowired
+    private ShiroFilterFactoryBean shiroFilterFactoryBean;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -201,10 +203,8 @@ public class SysUserController {
             return ResultsUtil.success();
         }
     }
-    @Autowired
-    private MyFilterChainDefinitions myFilterChainDefinitions;
-    @Autowired
-    private  ShiroFilterFactoryBean shiroFilterFactoryBean;
+
+
     //权限分配
     @RequestMapping("/permission/assign")
     public Result assignPermission(@RequestBody Map map) {
@@ -227,27 +227,24 @@ public class SysUserController {
         return ResultsUtil.success(list);
     }
 
-    @Autowired
-    WebApplicationContext applicationContext;
+
     @RequestMapping("/allUrl")
-    public Result getAllUrl(){
-        RequestMappingHandlerMapping mapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
-        // 获取url与类和方法的对应信息
-        Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
+    public Result getAllUrl(@RequestBody Map req){
+        int resourceId=(int)req.get("id");
+        List<String> urlList = sysUserService.getAllUrl();
+        List<String> rightList=sysUserService.getAllUrlByResourceID(resourceId);
+        Map<String,List> map =new HashedMap();
+        map.put("all",urlList);
+        map.put("right",rightList);
+		return ResultsUtil.success(map);
 
-		List<String> urlList = new ArrayList<>();
-		for (RequestMappingInfo info : map.keySet()) {
-			// 获取url的Set集合，一个方法可能对应多个url
-			Set<String> patterns = info.getPatternsCondition().getPatterns();
+    }
 
-			for (String url : patterns) {
-				urlList.add(url);
-			}
-		}
-
-		return ResultsUtil.success(urlList);
-
-
+    @RequestMapping("/resources/assign")
+    public Result assignPermission(@Validated @RequestBody ResourcePermissionInput input){
+        sysUserService.assignPermission(input);
+        myFilterChainDefinitions.updatePermission(shiroFilterFactoryBean);
+        return ResultsUtil.success();
     }
 
 }

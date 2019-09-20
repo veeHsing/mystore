@@ -13,6 +13,7 @@ import org.springframework.context.annotation.DependsOn;
 
 import javax.servlet.Filter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
@@ -28,8 +29,8 @@ public class ShiroConfig {
     }
 
     //配置shiro过滤器
-    @Bean("shiroFilter")
-    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager, MyFilterChainDefinitions myFilterChainDefinitions) {
+    @Bean
+    public ShiroFilterFactoryBean shiroFilterFactoryBean(DefaultWebSecurityManager securityManager,MyFilterChainDefinitions myFilterChainDefinitions) {
         //1.定义shiroFactoryBean
         ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
         //2.设置securityManager
@@ -49,13 +50,12 @@ public class ShiroConfig {
 
     /**
      * 配置securityManager 管理subject（默认）,并把自定义realm交由manager
-     * @param shiroDatabaseRealm
      * @return
      */
     @Bean("securityManager")
-    public DefaultWebSecurityManager securityManager(MyShiroRealm shiroDatabaseRealm) {
+    public DefaultWebSecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
-        securityManager.setRealm(shiroDatabaseRealm);
+        securityManager.setRealm(shiroDatabaseRealm());
         //非web关闭sessionManager(官网有介绍)
         DefaultSubjectDAO defaultSubjectDAO = new DefaultSubjectDAO();
         DefaultSessionStorageEvaluator storageEvaluator = new DefaultSessionStorageEvaluator();
@@ -65,23 +65,23 @@ public class ShiroConfig {
         return securityManager;
     }
 
-    @Bean
-    @DependsOn("lifecycleBeanPostProcessor")
-    public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
-        DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
-        defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
-        return defaultAdvisorAutoProxyCreator;
-    }
-
-    @Bean
-    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
-        return new LifecycleBeanPostProcessor();
-    }
-
-    @Bean
-    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(DefaultWebSecurityManager securityManager) {
-        AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
-        advisor.setSecurityManager(securityManager);
-        return advisor;
-    }
+//    @Bean
+//    @DependsOn("lifecycleBeanPostProcessor")
+//    public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
+//        DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+//        defaultAdvisorAutoProxyCreator.setProxyTargetClass(true);
+//        return defaultAdvisorAutoProxyCreator;
+//    }
+//
+//    @Bean
+//    public LifecycleBeanPostProcessor lifecycleBeanPostProcessor() {
+//        return new LifecycleBeanPostProcessor();
+//    }
+//
+//    @Bean
+//    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(DefaultWebSecurityManager securityManager) {
+//        AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
+//        advisor.setSecurityManager(securityManager);
+//        return advisor;
+//    }
 }

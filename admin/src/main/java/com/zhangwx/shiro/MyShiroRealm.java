@@ -7,12 +7,14 @@ import com.zhangwx.exception.ServiceException;
 import com.zhangwx.model.SysRole;
 import com.zhangwx.model.SysUser;
 import com.zhangwx.service.SysUserService;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.cache.Cache;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
@@ -68,6 +70,7 @@ public class MyShiroRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authcToken) throws AuthenticationException {
+        this.clearCachedAuthorizationInfo(SecurityUtils.getSubject().getPrincipals());
         JWTToken jwtToken=(JWTToken)authcToken;
         String username=jwtToken.getUsername();
         String password=jwtToken.getPassword();
@@ -84,4 +87,19 @@ public class MyShiroRealm extends AuthorizingRealm {
         }
     }
 
+
+    @Override
+    protected void doClearCache(PrincipalCollection principals) {
+        super.doClearCache(principals);
+    }
+
+    @Override
+    protected void clearCachedAuthorizationInfo(PrincipalCollection principals) {
+        super.clearCachedAuthorizationInfo(principals);
+    }
+
+    @Override
+    public Cache<Object, AuthorizationInfo> getAuthorizationCache() {
+        return super.getAuthorizationCache();
+    }
 }

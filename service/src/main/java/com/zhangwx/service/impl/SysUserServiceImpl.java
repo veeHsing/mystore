@@ -3,16 +3,14 @@ package com.zhangwx.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zhangwx.constants.MyExceptionCode;
-import com.zhangwx.dao.SysResourcesMapper;
-import com.zhangwx.dao.SysRoleMapper;
-import com.zhangwx.dao.SysRoleResourcesMapper;
-import com.zhangwx.dao.SysUserMapper;
+import com.zhangwx.dao.*;
 import com.zhangwx.enums.EnumSysResources;
 import com.zhangwx.enums.EnumSysRole;
 import com.zhangwx.enums.EnumSysRoleResources;
 import com.zhangwx.enums.EnumSysUser;
 import com.zhangwx.exception.ServiceException;
 import com.zhangwx.input.LoginInput;
+import com.zhangwx.input.ResourcePermissionInput;
 import com.zhangwx.input.SimplePageInput;
 import com.zhangwx.input.SysUserListInput;
 import com.zhangwx.model.*;
@@ -24,6 +22,7 @@ import com.zhangwx.service.SysUserService;
 import com.zhangwx.service.TokenService;
 import com.zhangwx.util.MD5Util;
 import com.zhangwx.util.UserRequest;
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -31,6 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.*;
 
@@ -52,6 +55,12 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Autowired(required = false)
     private SysResourcesMapper sysResourcesMapper;
+
+    @Autowired(required = false)
+    private SysResourcePermissionMapper sysResourcePermissionMapper;
+
+    @Autowired
+    WebApplicationContext applicationContext;
 
     private static final Logger logger = LoggerFactory.getLogger(SysUserServiceImpl.class);
 
@@ -464,5 +473,50 @@ public class SysUserServiceImpl implements SysUserService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<String> getAllUrl() {
+        RequestMappingHandlerMapping mapping = applicationContext.getBean(RequestMappingHandlerMapping.class);
+        // 获取url与类和方法的对应信息
+        Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
+        List<String> urlList = new ArrayList<>();
+        for (RequestMappingInfo info : map.keySet()) {
+            // 获取url的Set集合，一个方法可能对应多个url
+            Set<String> patterns = info.getPatternsCondition().getPatterns();
+            for (String url : patterns) {
+                url=url.replaceAll("\\{\\S*\\}","*");
+                urlList.add(url);
+            }
+        }
+        return urlList;
+    }
+
+    @Override
+    public List<String> getAllUrlByResourceID(long resourceId) {
+        SysResourcePermissionExample example=new SysResourcePermissionExample();
+        SysResourcePermissionExample.Criteria criteria=example.createCriteria();
+        criteria.andResourceIdEqualTo((int)resourceId);
+        List<SysResourcePermission>  list=sysResourcePermissionMapper.selectByExample(example);
+        List<String> finalList=new ArrayList<>();
+        for (SysResourcePermission obj : list){
+            finalList.add(obj.getRoute());
+        }
+        return finalList;
+    }
+
+    @Override
+    public int assignPermission(ResourcePermissionInput input) {
+        SysResourcePermissionExample example=new SysResourcePermissionExample();
+        SysResourcePermissionExample.Criteria criteria=example.createCriteria();
+        criteria.andResourceIdEqualTo(input.getResourceId());
+        sysResourcePermissionMapper.deleteByExample(example);
+        for (String s : input.getRouteList()){
+            SysResourcePermission tmp =new SysResourcePermission();
+            tmp.setResourceId(input.getResourceId());
+            tmp.setRoute(s);
+            sysResourcePermissionMapper.insert(tmp);
+        }
+        return 1;
     }
 }

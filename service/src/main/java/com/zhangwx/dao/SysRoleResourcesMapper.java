@@ -31,10 +31,9 @@ public interface SysRoleResourcesMapper {
 
     int updateByPrimaryKey(SysRoleResources record);
 
-    @Select("SELECT sr.route as code,GROUP_CONCAT(r.code) as rule FROM sys_role_resources as srr \n" +
-            "LEFT JOIN sys_resources sr ON srr.resource_id=sr.id  \n" +
-            "LEFT JOIN sys_role r ON srr.role_id=r.id\n" +
-            "WHERE srr.deleted=0 GROUP BY srr.resource_id ")
+    @Select("SELECT b.route as code,c.`code` as rule FROM sys_role_resources a \n" +
+            "LEFT JOIN sys_resource_permission b ON (a.resource_id=b.resource_id OR a.parent_id=b.resource_id)\n" +
+            "LEFT JOIN sys_role  c ON a.role_id=c.id")
     List<SysRoleResouresMap> getFilterChainDefinitionMap();
 
     List<SysRoleResources> selectBySimpleExample(SysRoleResourcesExample example);
